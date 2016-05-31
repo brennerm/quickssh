@@ -11,7 +11,7 @@ import json
 from EditDialog import EditDialog
 from QuickSSHEntry import QuickSSHEntry
 
-QUICKSSH_FILE_PATH = './quickssh'
+QUICKSSH_FILE_PATH = os.path.expanduser('~/.quickssh')
 
 
 class QuickSSH(object):
@@ -122,31 +122,63 @@ class QuickSSH(object):
     def add_host(self, group, new_host):
         group = group or ''
         self.groups[group].append(new_host)
-        self.construct_main_menu()
         self.__save()
+        self.construct_main_menu()
 
-    def remove(self, group, host_to_remove=None):
+    def remove(self, group, id_of_host_to_remove=None):
         if group not in self.groups:
             return
 
-        if host_to_remove:
+        if id_of_host_to_remove:
             for host in self.groups[group]:
-                print(host_to_remove, str(host))
-                if host.get_connection_string(self.default_user) == host_to_remove:
+                if host.id == id_of_host_to_remove:
                     self.groups[group].remove(host)
                     break
         else:
             del self.groups[group]
 
-        self.construct_main_menu()
         self.__save()
+        self.construct_main_menu()
 
     def add_group(self, group_name):
         self.groups[group_name] = []
         self.__save()
 
+    def edit_group(self, old_name, new_name):
+        if old_name not in self.groups:
+            return
+
+        self.groups[new_name] = self.groups[old_name]
+        del self.groups[old_name]
+        self.__save()
+        self.construct_main_menu()
+
+    def edit_host(self, group_name, new_group_name, host_id, new_username, new_hostname, new_port):
+        if group_name not in self.groups:
+            return
+
+        for host in self.groups[group_name]:
+            if host.id != host_id:
+                continue
+
+            host.username = new_username
+            host.hostname = new_hostname
+            host.port = new_port
+
+            if group_name == new_group_name:
+                break
+
+            self.groups[new_group_name].append(host)
+            self.groups[group_name].remove(host)
+
+            break
+
+        self.__save()
+        self.construct_main_menu()
+
     def ssh_into(self, entry, ssh_host):
-        cmd = "gnome-terminal -e 'bash -c \"ssh -p " + str(ssh_host.port) + " " + ssh_host.username + "@" + ssh_host.get_user(self.default_user) + "; exec bash\"'"
+        cmd = "gnome-terminal -e 'bash -c \"ssh -p " + (ssh_host.port or '22') + " " + ssh_host.get_user(self.default_user) + "@" + ssh_host.hostname + "; exec bash\"'"
+        print('Executing', '"', cmd, '"')
         subprocess.Popen(cmd, shell=True)
 
     def show_edit_dialog(self, widget):

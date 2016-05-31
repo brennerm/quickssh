@@ -1,10 +1,10 @@
 from gi.repository import Gtk
 
 
-class AddHostDialog(Gtk.Dialog):
-    def __init__(self, groups):
-        super(AddHostDialog, self).__init__("Add Host", None, 0,
-            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+class HostDialog(Gtk.Dialog):
+    def __init__(self, groups, user='', host='', port='', selected_group=''):
+        super(HostDialog, self).__init__("Add Host", None, 0,
+                                         (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
              Gtk.STOCK_OK, Gtk.ResponseType.OK))
 
         self.__groups = groups
@@ -15,22 +15,28 @@ class AddHostDialog(Gtk.Dialog):
         user_label = Gtk.Label('Username (Default: Current User)')
         user_label.set_halign(Gtk.Align.START)
         self.__user_entry = Gtk.Entry()
+        self.__user_entry.set_text(user or '')
 
-        host_label = Gtk.Label('Hostname')
+        host_label = Gtk.Label('Hostname or IP address')
         host_label.set_halign(Gtk.Align.START)
         self.__host_entry = Gtk.Entry()
+        self.__host_entry.set_text(host)
 
         port_label = Gtk.Label('Port (Default: 22)')
         port_label.set_halign(Gtk.Align.START)
         self.__port_entry = Gtk.Entry()
-        self.__port_entry.connect('changed', AddHostDialog.only_allow_integer)
+        self.__port_entry.set_text(port or '')
+        self.__port_entry.connect('changed', HostDialog.only_allow_integer)
 
         group_label = Gtk.Label('Group')
         group_label.set_halign(Gtk.Align.START)
 
         self.__group_combo = Gtk.ComboBoxText()
-        for group in self.__groups:
-            self.__group_combo.append_text(group)
+        for id, group in enumerate(self.__groups):
+            id = str(id)
+            self.__group_combo.append(id, group)
+            if group == selected_group:
+                self.__group_combo.set_active_id(id)
 
         self.__content_area.add(user_label)
         self.__content_area.add(self.__user_entry)
@@ -61,11 +67,10 @@ class AddHostDialog(Gtk.Dialog):
 
     def show_error(self):
         if not self.__error_message_displayed:
-                error_label = Gtk.Label('<span foreground="red">Hostname is required!</span>')
+                error_label = Gtk.Label('<span foreground="red">Hostname is required...</span>')
                 error_label.set_use_markup(True)
                 self.__content_area.add(error_label)
                 self.__content_area.show_all()
-
 
     @staticmethod
     def only_allow_integer(entry):
