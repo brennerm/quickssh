@@ -140,7 +140,7 @@ class EditDialog(Gtk.Dialog):
         if not result:
             return
 
-        group_name, username, hostname, port = result
+        group_name, hostname, username, port = result
         new_host = QuickSSHEntry(hostname, username, port)
 
         self.__quick_menu.add_host(group_name, new_host)
