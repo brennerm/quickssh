@@ -3,6 +3,7 @@ from gi.repository import Gtk
 from QuickSSHEntry import QuickSSHEntry
 from HostDialog import HostDialog
 from GroupDialog import GroupDialog
+from RmGroupConfirmDialog import RmGroupConfirmDialog
 
 
 class EditDialog(Gtk.Dialog):
@@ -85,6 +86,14 @@ class EditDialog(Gtk.Dialog):
             group_name = self.__store[selection][4]
             if group_name == '':
                 return
+
+            if self.__store.iter_has_child(selection):
+                dialog = RmGroupConfirmDialog()
+                result = dialog.run()
+                dialog.destroy()
+                if result == Gtk.ResponseType.CANCEL:
+                    return
+
             self.__quick_menu.remove(group_name)
         # ssh entry
         elif depth == 1:
