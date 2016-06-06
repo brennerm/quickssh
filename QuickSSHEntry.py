@@ -2,11 +2,12 @@ import uuid
 
 
 class QuickSSHEntry:
-    def __init__(self, hostname, username=None, port=None):
+    def __init__(self, hostname, username=None, port=None, label=None):
         self.__id = str(uuid.uuid4())
         self.__hostname = hostname
         self.__username = username or None
         self.__port = port or None
+        self.__label = label or None
 
     def __str__(self):
         return str(self.__username) + '@' + self.__hostname + ':' + str(self.__port)
@@ -53,9 +54,18 @@ class QuickSSHEntry:
     def port(self, value):
         self.__port = value or None
 
+    @property
+    def label(self):
+        return self.__label
+
+    @label.setter
+    def label(self, value):
+        self.__label = value
+
     def to_dict(self):
         return {
             'hostname': self.__hostname,
             'username': self.__username,
-            'port': self.__port
+            'port': self.__port,
+            'label': self.__label
         }

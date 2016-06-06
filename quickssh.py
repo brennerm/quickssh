@@ -89,7 +89,7 @@ class QuickSSH(object):
                 submenu.show()
 
             for host in hosts:
-                item = Gtk.MenuItem(host.get_connection_string(self.default_user))
+                item = Gtk.MenuItem(host.label or host.get_connection_string(self.default_user))
                 item.show()
                 item.connect('activate', self.ssh_into, host)
 
@@ -153,7 +153,7 @@ class QuickSSH(object):
         self.__save()
         self.construct_main_menu()
 
-    def edit_host(self, group_name, new_group_name, host_id, new_username, new_hostname, new_port):
+    def edit_host(self, group_name, new_group_name, host_id, new_username, new_hostname, new_port, new_label):
         if group_name not in self.groups:
             return
 
@@ -164,6 +164,7 @@ class QuickSSH(object):
             host.username = new_username
             host.hostname = new_hostname
             host.port = new_port
+            host.label = new_label
 
             if group_name == new_group_name:
                 break
